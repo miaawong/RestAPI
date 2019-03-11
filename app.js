@@ -1,24 +1,39 @@
 'use strict'
 
-let express = require('express');
-let app = express();
-let routes = require('./routes');
+const express = require('express');
+const app = express();
+const routes = require('./routes');
 
-let jsonParser = require('body-parser').json;
-let logger = require('morgan');
+const jsonParser = require('body-parser').json;
+const logger = require('morgan');
 
 /* when the app receives a request, jsonParser will parse the request 
 body as JSON and make it accessible from the request's body property */
 app.use(logger("dev"));
 app.use(jsonParser());
 
+const mongoose = require('mongoose');
 
+//connecting to mongoose db server 
+mongoose.connect('mongodb://localhost:27017/qa');
+
+const db = mongoose.connection;
+
+db.on('error', (err) => {
+    console.log('uh oh there was an error!', err);
+});
+//listen for open event 
+// using 'once' method to listen for it, it is like the 'on' method
+// except it fires its handler the first time the event occurs. not everytime (like 'on')
+db.once('open', () => {
+    console.log('db connection successful');
+});
 // /questions is where to start 
 app.use('/questions', routes);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-    let err = new Error("Sorry could not be found");
+    const err = new Error("Sorry could not be found");
     err.status = 404;
     next(err);
 });
@@ -35,7 +50,7 @@ app.use((err, req, res, next) => {
 });
 
 // setting up the server 
-let port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
     console.log('Server is running on port', port);
