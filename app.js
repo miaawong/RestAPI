@@ -28,6 +28,16 @@ db.on('error', (err) => {
 db.once('open', () => {
     console.log('db connection successful');
 });
+//for setting up your API to grant access to the resources from domain 
+// when you set up your API to be used by a web browser. 
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    if (req.method === "OPTIONS") {
+        res.header("Access-Control-Allow-Methods", "PUT,POST,DELETE");
+    }
+    next();
+});
 // /questions is where to start 
 app.use('/questions', routes);
 
